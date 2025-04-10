@@ -1,0 +1,251 @@
+<?php
+// Okunmamış bildirimleri getir
+$unread_notifications = [];
+$notification_count = 0;
+try {
+    $stmt = $conn->prepare("
+        SELECT * FROM notifications 
+        WHERE user_id = ? AND status = 'unread' 
+        ORDER BY created_at DESC 
+        LIMIT 5
+    ");
+    $stmt->execute([$_SESSION['user_id']]);
+    $unread_notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $notification_count = count($unread_notifications);
+} catch(PDOException $e) {
+    // Hata durumunda sessizce devam et
+}
+
+// Kullanıcı bakiyesini getir
+try {
+    $stmt = $conn->prepare("SELECT balance, name, username FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user_balance = $user_data['balance'] ?? 0;
+    $user_name = $user_data['name'] ?? $user_data['username'] ?? $_SESSION['username'];
+} catch(PDOException $e) {
+    $user_balance = 0;
+    $user_name = $_SESSION['username'];
+}
+
+// Aktif sayfayı belirle
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
+
+<!-- Topbar Start -->
+<div class="navbar-custom">
+    <div class="container-fluid">
+        <ul class="list-unstyled topnav-menu float-end mb-0">
+
+            <!-- Bakiye Gösterimi -->
+            <li class="dropdown notification-list topbar-dropdown">
+                <a class="nav-link dropdown-toggle nav-user me-0 waves-effect waves-light" href="deposit.php">
+                    <span class="d-none d-xl-inline-block ms-1 fw-medium">
+                        <i class="fas fa-wallet me-1"></i> Bakiye: <?php echo number_format($user_balance, 2, ',', '.'); ?> ₺
+                    </span>
+                </a>
+            </li>
+
+            <!-- Bildirimler -->
+            <li class="dropdown notification-list topbar-dropdown">
+                <a class="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                    <i class="fe-bell noti-icon"></i>
+                    <?php if ($notification_count > 0): ?>
+                        <span class="badge bg-danger rounded-circle noti-icon-badge"><?php echo $notification_count; ?></span>
+                    <?php endif; ?>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-lg">
+                    <!-- Bildirim Başlığı -->
+                    <div class="dropdown-item noti-title">
+                        <h5 class="m-0">
+                            <span class="float-end">
+                                <a href="notifications.php" class="text-dark">
+                                    <small>Tümünü Temizle</small>
+                                </a>
+                            </span>Bildirimler
+                        </h5>
+                    </div>
+
+                    <div class="noti-scroll" data-simplebar>
+                        <?php if (empty($unread_notifications)): ?>
+                            <div class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary">
+                                    <i class="fe-bell"></i>
+                                </div>
+                                <p class="notify-details">Yeni bildiriminiz yok</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($unread_notifications as $notification): ?>
+                                <a href="notifications.php" class="dropdown-item notify-item">
+                                    <div class="notify-icon bg-primary">
+                                        <i class="fe-bell"></i>
+                                    </div>
+                                    <p class="notify-details"><?php echo htmlspecialchars($notification['title']); ?>
+                                        <small class="text-muted"><?php echo htmlspecialchars($notification['message']); ?></small>
+                                        <small class="text-muted"><?php echo date('d.m.Y H:i', strtotime($notification['created_at'])); ?></small>
+                                    </p>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Tüm Bildirimleri Göster -->
+                    <a href="notifications.php" class="dropdown-item text-center text-primary notify-item notify-all">
+                        Tüm Bildirimleri Göster
+                        <i class="fe-arrow-right"></i>
+                    </a>
+                </div>
+            </li>
+
+            <!-- Kullanıcı Menüsü -->
+            <li class="dropdown notification-list topbar-dropdown">
+                <a class="nav-link dropdown-toggle nav-user me-0 waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                    <span class="pro-user-name ms-1">
+                        <?php echo htmlspecialchars($user_name); ?> <i class="mdi mdi-chevron-down"></i>
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end profile-dropdown">
+                    <!-- Kullanıcı Başlığı -->
+                    <div class="dropdown-header noti-title">
+                        <h6 class="text-overflow m-0">Hoş Geldiniz!</h6>
+                    </div>
+
+                    <!-- Profil Menü Öğeleri -->
+                    <a href="profile.php" class="dropdown-item notify-item">
+                        <i class="fe-user"></i>
+                        <span>Profilim</span>
+                    </a>
+
+                    <a href="orders.php" class="dropdown-item notify-item">
+                        <i class="fe-shopping-cart"></i>
+                        <span>Siparişlerim</span>
+                    </a>
+
+                    <a href="payments.php" class="dropdown-item notify-item">
+                        <i class="fe-credit-card"></i>
+                        <span>Ödemelerim</span>
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <!-- Çıkış Yap -->
+                    <a href="../logout.php" class="dropdown-item notify-item">
+                        <i class="fe-log-out"></i>
+                        <span>Çıkış Yap</span>
+                    </a>
+                </div>
+            </li>
+        </ul>
+
+        <!-- LOGO -->
+        <div class="logo-box">
+            <a href="index.php" class="logo logo-dark text-center">
+                <span class="logo-sm">
+                    <img src="../assets/techui/images/logo-sm.png" alt="logo" height="22">
+                </span>
+                <span class="logo-lg">
+                    <img src="../assets/techui/images/logo-dark.png" alt="logo" height="20">
+                </span>
+            </a>
+
+            <a href="index.php" class="logo logo-light text-center">
+                <span class="logo-sm">
+                    <img src="../assets/techui/images/logo-sm.png" alt="logo" height="22">
+                </span>
+                <span class="logo-lg">
+                    <img src="../assets/techui/images/logo-light.png" alt="logo" height="20">
+                </span>
+            </a>
+        </div>
+
+        <ul class="list-unstyled topnav-menu topnav-menu-left m-0">
+            <li>
+                <button class="button-menu-mobile waves-effect waves-light">
+                    <i class="fe-menu"></i>
+                </button>
+            </li>
+
+            <li>
+                <!-- Mobil Menü Geçişi -->
+                <a class="navbar-toggle nav-link" data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+                    <div class="lines">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="clearfix"></div>
+    </div>
+</div>
+<!-- Topbar End -->
+
+<!-- ========== Left Sidebar Start ========== -->
+<div class="left-side-menu">
+    <div class="h-100" data-simplebar>
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+            <ul id="side-menu">
+                <li class="menu-title">Navigasyon</li>
+
+                <li>
+                    <a href="index.php" class="<?php echo $current_page === 'index.php' ? 'active' : ''; ?>">
+                        <i class="fe-home"></i>
+                        <span> Ana Sayfa </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="orders.php" class="<?php echo $current_page === 'orders.php' ? 'active' : ''; ?>">
+                        <i class="fe-shopping-cart"></i>
+                        <span> Siparişlerim </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="payments.php" class="<?php echo $current_page === 'payments.php' ? 'active' : ''; ?>">
+                        <i class="fe-credit-card"></i>
+                        <span> Ödemelerim </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="support.php" class="<?php echo in_array($current_page, ['support.php', 'view_ticket.php', 'new_ticket.php']) ? 'active' : ''; ?>">
+                        <i class="fe-headphones"></i>
+                        <span> Destek </span>
+                    </a>
+                </li>
+
+                <li class="menu-title mt-2">İşlemler</li>
+
+                <li>
+                    <a href="new_order.php" class="<?php echo $current_page === 'new_order.php' ? 'active' : ''; ?>">
+                        <i class="fe-plus-circle"></i>
+                        <span class="badge bg-success float-end">Yeni</span>
+                        <span> Yeni Sipariş </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="deposit.php" class="<?php echo $current_page === 'deposit.php' ? 'active' : ''; ?>">
+                        <i class="fe-dollar-sign"></i>
+                        <span> Bakiye Yükle </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="profile.php" class="<?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
+                        <i class="fe-user"></i>
+                        <span> Profilim </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- Sidebar Menu Sonu -->
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+<!-- Left Sidebar End -->

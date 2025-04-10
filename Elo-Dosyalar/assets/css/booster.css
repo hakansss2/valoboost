@@ -1,0 +1,130 @@
+/* Booster Panel Styles */
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--light-color);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Navbar Styles */
+.navbar {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.navbar-brand img {
+    margin-right: 0.5rem;
+}
+
+/* Stats Card */
+.stats-card {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-3px);
+}
+
+.stats-card .icon {
+    opacity: 0.4;
+}
+
+.stats-card.primary {
+    background: linear-gradient(45deg, var(--primary-color), #6f8dff);
+    color: white;
+}
+
+.stats-card.success {
+    background: linear-gradient(45deg, var(--success-color), #2ede9f);
+    color: white;
+}
+
+.stats-card.warning {
+    background: linear-gradient(45deg, var(--warning-color), #ffd453);
+    color: white;
+}
+
+.stats-card.info {
+    background: linear-gradient(45deg, var(--info-color), #4bd4e5);
+    color: white;
+}
+
+/* Card Styles */
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border: none;
+    border-radius: 0.35rem;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+/* Progress Bar */
+.progress {
+    height: 1.5rem;
+    background-color: #eaecf4;
+    border-radius: 0.35rem;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+    border-radius: 0.35rem;
+}
+
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f8f9fc;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2e59d9;
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+    box-shadow: 0 -0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-nav {
+        padding-top: 1rem;
+    }
+    
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+} 
